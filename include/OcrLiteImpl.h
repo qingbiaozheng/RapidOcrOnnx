@@ -2,7 +2,8 @@
 #define __OCR_LITE_IMPL_H__
 
 #include "opencv2/core.hpp"
-#include <onnxruntime/core/session/onnxruntime_cxx_api.h>
+//#include <onnxruntime/core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 #include "OcrStruct.h"
 #include "DbNet.h"
 #include "AngleNet.h"
@@ -22,6 +23,9 @@ public:
     void enableResultTxt(const char *path, const char *imgName);
 
     void setGpuIndex(int gpuIndex);
+
+    bool initModels(const std::string &detPath, const std::string &clsPath,
+                    const std::string &recPath);
 
     bool initModels(const std::string &detPath, const std::string &clsPath,
                     const std::string &recPath, const std::string &keysPath);

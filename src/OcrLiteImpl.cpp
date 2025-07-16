@@ -39,6 +39,22 @@ void OcrLiteImpl::setGpuIndex(int gpuIndex) {
 }
 
 bool OcrLiteImpl::initModels(const std::string &detPath, const std::string &clsPath,
+                         const std::string &recPath) {
+    Logger("=====Init Models=====\n");
+    Logger("--- Init DbNet ---\n");
+    dbNet.initModel(detPath);
+
+    Logger("--- Init AngleNet ---\n");
+    angleNet.initModel(clsPath);
+
+    Logger("--- Init CrnnNet ---\n");
+    crnnNet.initModel(recPath);
+
+    Logger("Init Models Success!\n");
+    return true;
+}
+
+bool OcrLiteImpl::initModels(const std::string &detPath, const std::string &clsPath,
                          const std::string &recPath, const std::string &keysPath) {
     Logger("=====Init Models=====\n");
     Logger("--- Init DbNet ---\n");
@@ -73,11 +89,46 @@ cv::Mat makePadding(cv::Mat &src, const int padding) {
     return paddingSrc;
 }
 
+cv::Mat crop_and_flip(const cv::Mat& image, int h_ratio = 8, int w_ratio = 2) {
+    // 获取图像高度和宽度
+    int height = image.rows;
+    int width = image.cols;
+
+    // 计算裁剪尺寸
+    int crop_height = height / h_ratio;
+    int crop_width = width / w_ratio;
+
+    // 裁剪左下角区域
+    cv::Rect left_bottom_roi(0, height - crop_height, crop_width, crop_height);
+    cv::Mat left_bottom_crop = image(left_bottom_roi);
+
+    // 裁剪右下角区域
+    cv::Rect right_bottom_roi(width - crop_width, height - crop_height, crop_width, crop_height);
+    cv::Mat right_bottom_crop = image(right_bottom_roi);
+
+    // 水平翻转两个裁剪图像
+    cv::Mat left_bottom_flip, right_bottom_flip;
+    cv::flip(left_bottom_crop, left_bottom_flip, 1);  // 1 = 水平翻转
+    cv::flip(right_bottom_crop, right_bottom_flip, 1);
+
+    // 水平拼接原图与翻转图
+    cv::Mat left_combined, right_combined;
+    cv::hconcat(left_bottom_crop, left_bottom_flip, left_combined);
+    cv::hconcat(right_bottom_crop, right_bottom_flip, right_combined);
+
+    // 再将两个结果图像水平拼接
+    cv::Mat result_image;
+    cv::hconcat(left_combined, right_combined, result_image);
+
+    return result_image;
+}
+
 OcrResult OcrLiteImpl::detect(const char *path, const char *imgName,
                           const int padding, const int maxSideLen,
                           float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle) {
     std::string imgFile = getSrcImgFilePath(path, imgName);
     cv::Mat originSrc = imread(imgFile, cv::IMREAD_COLOR);//default : BGR
+
     int originMaxSide = (std::max)(originSrc.cols, originSrc.rows);
     int resize;
     if (maxSideLen <= 0 || maxSideLen > originMaxSide) {
@@ -118,6 +169,10 @@ OcrResult OcrLiteImpl::detectBitmap(uint8_t *bitmapData, int width, int height, 
     } else if (channels == 3) {
         cv::cvtColor(originSrc, originSrc, cv::COLOR_RGB2BGR);
     }
+    //
+    originSrc = crop_and_flip(originSrc);
+    //cv::imwrite("crop_and_flip.png", originSrc);
+
     OcrResult result;
     result = detect(originSrc, padding, maxSideLen,
                     boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle);
