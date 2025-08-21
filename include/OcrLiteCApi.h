@@ -76,7 +76,7 @@ _QM_OCR_API OCR_BOOL
 OcrDetect(OCR_HANDLE handle, const char *imgPath, const char *imgName, OCR_PARAM *pParam);
 
 _QM_OCR_API OCR_BOOL
-OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESULT *ocrResult);
+OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESULT *ocrResult, bool isRecog);
 
 _QM_OCR_API OCR_BOOL
 OcrFreeResult(OCR_RESULT *result);

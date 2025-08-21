@@ -15,7 +15,7 @@ OcrInit(const char *szDetModel, const char *szClsModel, const char *szRecModel, 
     
     OCR_OBJ *pOcrObj = new OCR_OBJ;
     
-    //pOcrObj->OcrObj.initLogger(true, false, false);
+    pOcrObj->OcrObj.initLogger(true, false, true);
     pOcrObj->OcrObj.Logger("=====Logger begin=====\n");
     if (pOcrObj) {
         
@@ -79,7 +79,7 @@ OcrDetect(OCR_HANDLE handle, const char *imgPath, const char *imgName, OCR_PARAM
 }
 
 _QM_OCR_API OCR_BOOL
-OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESULT *ocrResult) {
+OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESULT *ocrResult, bool isRecog) {
     OCR_OBJ *pOcrObj = (OCR_OBJ *) handle;
     if (!pOcrObj){
         fprintf(stderr, "error:pOcrObj is empty!\n"); fflush(stderr);
@@ -119,15 +119,17 @@ OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESUL
         }
         result = pOcrObj->OcrObj.detectBitmap(input->data,input->width,input->height, input->channels, Param.padding, Param.maxSideLen,
                                                         Param.boxScoreThresh, Param.boxThresh, Param.unClipRatio,
-                                                        Param.doAngle != 0, Param.mostAngle != 0);
+                                                        Param.doAngle != 0, Param.mostAngle != 0, isRecog);
     }
     if(input->type == 1){
         result= pOcrObj->OcrObj.detectImageBytes(input->data,input->dataLength, input->channels >= 3 ? 0 : 1, Param.padding, Param.maxSideLen,
                                                  Param.boxScoreThresh, Param.boxThresh, Param.unClipRatio,
-                                                 Param.doAngle != 0, Param.mostAngle != 0);
+                                                 Param.doAngle != 0, Param.mostAngle != 0, isRecog);
     }
 
-    if (result.strRes.length() > 0) {
+    if (result.strRes.length() == 0 && result.textBlocks.size() == 0) {
+        return FALSE;
+    }else if(result.strRes.length() > 0){
         ocrResult->dbNetTime = result.dbNetTime;
         ocrResult->detectTime = result.detectTime;
         ocrResult->textBlocksLength = result.textBlocks.size();
@@ -165,8 +167,8 @@ OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESUL
         }
         ocrResult->textBlocks = rawArray;
         return TRUE;
-    } else
-        return FALSE;
+    }
+    return TRUE; 
 }
 
 _QM_OCR_API OCR_BOOL
