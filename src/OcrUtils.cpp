@@ -392,6 +392,7 @@ std::string getResultTxtFilePath(const char *path, const char *imgName) {
 std::string getResultImgFilePath(const char *path, const char *imgName) {
     std::string filePath;
     filePath.append(path).append(imgName).append("-result.jpg");
+    //fprintf(stderr, "filepath %s\n", filePath.c_str()); fflush(stderr);
     return filePath;
 }
 

@@ -64,6 +64,53 @@ void CrnnNet::setNumThread(int numOfThread) {
     sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 }
 
+struct PackedModel {
+    std::vector<uint8_t> onnxData;
+    std::vector<std::string> alphabet;
+};
+
+PackedModel loadPackedModel(const std::string& filepath) {
+    std::ifstream in(filepath, std::ios::binary | std::ios::ate);
+    if (!in) throw std::runtime_error("无法打开 " + filepath);
+
+    std::streamsize fsize = in.tellg();
+    in.seekg(0, std::ios::beg);
+
+    uint32_t onnxLen = 0;
+    in.read(reinterpret_cast<char*>(&onnxLen), 4);
+    if (onnxLen + 4 > fsize) throw std::runtime_error("onnxLen 超出文件大小");
+    PackedModel pkg;
+    pkg.onnxData.resize(onnxLen);
+    in.read(reinterpret_cast<char*>(pkg.onnxData.data()), onnxLen);
+
+    // 剩下的是 txt
+    std::stringstream txtStream;
+    txtStream << in.rdbuf();
+    std::string line;
+    while (std::getline(txtStream, line)) {
+        if (!line.empty()){
+            pkg.alphabet.push_back(line);
+        }
+    }
+
+    return pkg;
+}
+
+void CrnnNet::initModel(const std::string &pathStr) {
+
+    PackedModel pkg = loadPackedModel(pathStr);
+    session = new Ort::Session(env, pkg.onnxData.data(), pkg.onnxData.size(), sessionOptions);
+
+    inputNamesPtr = getInputNames(session);
+    outputNamesPtr = getOutputNames(session);
+
+    //load keys
+    keys = pkg.alphabet;
+    keys.insert(keys.begin(), "#");
+    keys.emplace_back(" ");
+    printf("total keys size(%lu)\n", keys.size());
+}
+
 void CrnnNet::initModel(const std::string &pathStr, const std::string &keysPath) {
 #ifdef _WIN32
     std::wstring crnnPath = strToWstr(pathStr);
@@ -87,7 +134,7 @@ void CrnnNet::initModel(const std::string &pathStr, const std::string &keysPath)
     }
     keys.insert(keys.begin(), "#");
     keys.emplace_back(" ");
-    printf("total keys size(%lu)\n", keys.size());
+    printf("-->total keys size(%lu)\n", keys.size());
 }
 
 template<class ForwardIterator>

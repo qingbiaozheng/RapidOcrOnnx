@@ -3,6 +3,7 @@
 
 #include "opencv2/core.hpp"
 #include <vector>
+#include <stdarg.h>
 
 struct ScaleParam {
     int srcWidth;

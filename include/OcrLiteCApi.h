@@ -26,10 +26,10 @@ typedef char OCR_BOOL;
 
 typedef struct __ocr_param {
     int padding;
-    int maxSideLen;
-    float boxScoreThresh;
-    float boxThresh;
-    float unClipRatio;
+    int maxSideLen; //2000
+    float boxScoreThresh;//0.3
+    float boxThresh; //0.5
+    float unClipRatio;//1.6
     int doAngle; // 1 means do
     int mostAngle; // 1 means true
 } OCR_PARAM;
@@ -76,7 +76,7 @@ _QM_OCR_API OCR_BOOL
 OcrDetect(OCR_HANDLE handle, const char *imgPath, const char *imgName, OCR_PARAM *pParam);
 
 _QM_OCR_API OCR_BOOL
-OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESULT *ocrResult);
+OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESULT *ocrResult, bool isRecog);
 
 _QM_OCR_API OCR_BOOL
 OcrFreeResult(OCR_RESULT *result);

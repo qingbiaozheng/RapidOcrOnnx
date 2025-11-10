@@ -2,7 +2,8 @@
 #define __OCR_CRNNNET_H__
 
 #include "OcrStruct.h"
-#include <onnxruntime/core/session/onnxruntime_cxx_api.h>
+//#include <onnxruntime/core/session/onnxruntime_cxx_api.h>
+#include <onnxruntime_cxx_api.h>
 #include <opencv2/opencv.hpp>
 
 class CrnnNet {
@@ -14,6 +15,8 @@ public:
 
     void setGpuIndex(int gpuIndex);
 
+    void initModel(const std::string &pathStr);
+
     void initModel(const std::string &pathStr, const std::string &keysPath);
 
     std::vector<TextLine> getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName);
@@ -21,7 +24,7 @@ public:
 private:
     bool isOutputDebugImg = false;
     Ort::Session *session;
-    Ort::Env env = Ort::Env(ORT_LOGGING_LEVEL_ERROR, "CrnnNet");
+    Ort::Env env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "CrnnNet");
     Ort::SessionOptions sessionOptions = Ort::SessionOptions();
     int numThread = 0;
 

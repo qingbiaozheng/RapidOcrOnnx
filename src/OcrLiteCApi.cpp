@@ -12,15 +12,28 @@ typedef struct {
 
 _QM_OCR_API OCR_HANDLE
 OcrInit(const char *szDetModel, const char *szClsModel, const char *szRecModel, const char *szKeyPath, int nThreads) {
-
+    
     OCR_OBJ *pOcrObj = new OCR_OBJ;
+    
+    pOcrObj->OcrObj.initLogger(false, false, false);
+    pOcrObj->OcrObj.Logger("=====Logger begin=====\n");
     if (pOcrObj) {
+        
         pOcrObj->OcrObj.setNumThread(nThreads);
-
-        pOcrObj->OcrObj.initModels(szDetModel, szClsModel, szRecModel, szKeyPath);
+        
+        if(!szKeyPath){
+            
+            pOcrObj->OcrObj.initModels(szDetModel, szClsModel, szRecModel);
+            
+        } else{
+            
+            pOcrObj->OcrObj.initModels(szDetModel, szClsModel, szRecModel, szKeyPath);
+            
+        }
 
         return pOcrObj;
     } else {
+        
         return nullptr;
     }
 
@@ -66,11 +79,12 @@ OcrDetect(OCR_HANDLE handle, const char *imgPath, const char *imgName, OCR_PARAM
 }
 
 _QM_OCR_API OCR_BOOL
-OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESULT *ocrResult) {
-
+OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESULT *ocrResult, bool isRecog) {
     OCR_OBJ *pOcrObj = (OCR_OBJ *) handle;
-    if (!pOcrObj)
+    if (!pOcrObj){
+        fprintf(stderr, "error:pOcrObj is empty!\n"); fflush(stderr);
         return FALSE;
+    }
 
     OCR_PARAM Param = *pParam;
     if (Param.padding == 0)
@@ -88,32 +102,34 @@ OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESUL
     if (Param.unClipRatio == 0)
         Param.unClipRatio = 2.0;
 
-    if (Param.doAngle == 0)
-        Param.doAngle = 1;
+    //if (Param.doAngle == 0)
+    //    Param.doAngle = 1;
 
     if (Param.mostAngle == 0)
         Param.mostAngle = 1;
     OcrResult result;
     if(input->dataLength == 0) {
+        fprintf(stderr, "error:input.->dataLength is empty!\n"); fflush(stderr);
         return FALSE;
     }
-
     if(input->type == 0){
         if(input->channels == 0){
+            fprintf(stderr, "error:channels is empty!\n"); fflush(stderr);
             return FALSE;
         }
         result = pOcrObj->OcrObj.detectBitmap(input->data,input->width,input->height, input->channels, Param.padding, Param.maxSideLen,
                                                         Param.boxScoreThresh, Param.boxThresh, Param.unClipRatio,
-                                                        Param.doAngle != 0, Param.mostAngle != 0);
+                                                        Param.doAngle != 0, Param.mostAngle != 0, isRecog);
     }
-
     if(input->type == 1){
         result= pOcrObj->OcrObj.detectImageBytes(input->data,input->dataLength, input->channels >= 3 ? 0 : 1, Param.padding, Param.maxSideLen,
                                                  Param.boxScoreThresh, Param.boxThresh, Param.unClipRatio,
-                                                 Param.doAngle != 0, Param.mostAngle != 0);
+                                                 Param.doAngle != 0, Param.mostAngle != 0, isRecog);
     }
 
-    if (result.strRes.length() > 0) {
+    if (result.strRes.length() == 0 && result.textBlocks.size() == 0) {
+        return FALSE;
+    }else if(result.strRes.length() > 0){
         ocrResult->dbNetTime = result.dbNetTime;
         ocrResult->detectTime = result.detectTime;
         ocrResult->textBlocksLength = result.textBlocks.size();
@@ -122,6 +138,7 @@ OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESUL
 
        // 分配足够大的内存块
         auto *rawArray = static_cast<TEXT_BLOCK*>(calloc(count, sizeof(TEXT_BLOCK)));
+        //fprintf(stderr, "count=%d\n", count); fflush(stderr);
         for (size_t i = 0; i < count; i++) {
             TextBlock textBlock = result.textBlocks[i];
 
@@ -140,6 +157,7 @@ OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESUL
             }
             rawArray[i].boxPoint = boxPoint;
             rawArray[i].boxPointLength = textBlock.boxPoint.size();
+            if(textBlock.text.size() > 1) printf("---->%s\n", textBlock.text.c_str());
             auto* text = static_cast<uint8_t*>(calloc(textBlock.text.size(), sizeof (uint8_t)));
             std::copy(textBlock.text.begin(), textBlock.text.end(), text);
             rawArray[i].text = text;
@@ -149,8 +167,8 @@ OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESUL
         }
         ocrResult->textBlocks = rawArray;
         return TRUE;
-    } else
-        return FALSE;
+    }
+    return TRUE; 
 }
 
 _QM_OCR_API OCR_BOOL
