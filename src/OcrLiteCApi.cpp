@@ -138,11 +138,7 @@ OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESUL
 
        // 分配足够大的内存块
         auto *rawArray = static_cast<TEXT_BLOCK*>(calloc(count, sizeof(TEXT_BLOCK)));
-<<<<<<< HEAD
         //fprintf(stderr, "count=%d\n", count); fflush(stderr);
-=======
-        fprintf(stderr, "count=%d\n", count); fflush(stderr);
->>>>>>> 378cab4b26e6cb19b534b498c6dd867a3a7aabd9
         for (size_t i = 0; i < count; i++) {
             TextBlock textBlock = result.textBlocks[i];
 
@@ -161,11 +157,8 @@ OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESUL
             }
             rawArray[i].boxPoint = boxPoint;
             rawArray[i].boxPointLength = textBlock.boxPoint.size();
-<<<<<<< HEAD
             if(textBlock.text.size() > 1) printf("---->%s\n", textBlock.text.c_str());
-=======
-            printf("---->%s\n", textBlock.text.c_str());
->>>>>>> 378cab4b26e6cb19b534b498c6dd867a3a7aabd9
+
             auto* text = static_cast<uint8_t*>(calloc(textBlock.text.size(), sizeof (uint8_t)));
             std::copy(textBlock.text.begin(), textBlock.text.end(), text);
             rawArray[i].text = text;
