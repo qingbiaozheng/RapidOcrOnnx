@@ -14,11 +14,11 @@ def main():
     image_path = sys.argv[1]
     
     # 默认模型路径
-    det_model = "models/ch_PP-OCRv4_det_infer.onnx"
-    cls_model = "models/ch_ppocr_mobile_v2.0_cls_infer.onnx"
-    #rec_model = "models/ch_PP-OCRv3_rec_infer.onnx"
-    rec_model = "models/rec.bin"
-    keys_path = "models/ppocr_keys_v1.txt"
+    det_model = "../external/RapidOcrOnnxLibTest/resource/models/ch_PP-OCRv4_det_infer.onnx"
+    cls_model = "../external/RapidOcrOnnxLibTest/resource/models/ch_ppocr_mobile_v2.0_cls_infer.onnx"
+    #rec_model = "../external/models/ch_PP-OCRv3_rec_infer.onnx"
+    rec_model = "../external/RapidOcrOnnxLibTest/resource/models/rec.bin"
+    keys_path = "../external/RapidOcrOnnxLibTest/resource/models/ppocr_keys_v1.txt" 
     
     # 从命令行参数覆盖默认路径
     if len(sys.argv) > 2:

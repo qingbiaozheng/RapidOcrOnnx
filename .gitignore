@@ -139,6 +139,7 @@ cmake-build-debug/
 build/
 build-lib/
 /models/*.onnx
+python/models
 onnxruntime-gpu/*
 !onnxruntime-gpu/README.md
 !onnxruntime-gpu/OnnxRuntimeWrapper.cmake

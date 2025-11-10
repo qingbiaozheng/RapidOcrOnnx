@@ -1,3 +1,6 @@
 [submodule "python/python/models"]
 	path = python/python/models
 	url = https://github.com/qingbiaozheng/RapidOcrOnnxLibTest.git
+[submodule "external/RapidOcrOnnxLibTest"]
+	path = external/RapidOcrOnnxLibTest
+	url = https://github.com/qingbiaozheng/RapidOcrOnnxLibTest.git
