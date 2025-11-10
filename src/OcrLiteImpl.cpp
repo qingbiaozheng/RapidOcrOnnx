@@ -199,7 +199,7 @@ OcrResult OcrLiteImpl::detect(const cv::Mat &mat, int padding, int maxSideLen, f
     ScaleParam scale = getScaleParam(paddingSrc, resize);
     OcrResult result;
     std::string path = "", imgName = "";
-    //fprintf(stderr, "path:%s - imgName:%s\n", path.c_str(), imgName.c_str()); fflush(stderr);
+    fprintf(stderr, "path:%s - imgName:%s\n", path.c_str(), imgName.c_str()); fflush(stderr);
     result = detect(path.c_str(), imgName.c_str(), paddingSrc, paddingRect, scale,
                     boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle, isRecog);
     return result;
