@@ -57,7 +57,7 @@ bool OcrLiteImpl::initModels(const std::string &detPath, const std::string &clsP
 
 bool OcrLiteImpl::initModels(const std::string &detPath, const std::string &clsPath,
                          const std::string &recPath, const std::string &keysPath) {
-    Logger("=====Init Models=====\n");
+    Logger("<=====Init Models=====>\n");
     Logger("--- Init DbNet ---\n");
     dbNet.initModel(detPath);
 
