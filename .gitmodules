@@ -1,0 +1,3 @@
+[submodule "python/python/models"]
+	path = python/python/models
+	url = https://github.com/qingbiaozheng/RapidOcrOnnxLibTest.git
